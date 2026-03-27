@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
+const prompts = require('./prompts');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -147,8 +148,7 @@ app.post('/api/chat', async (req, res) => {
         const materia = rows[0];
 
         // Costruisci le System Instructions
-        let systemInstruction = `Sei un tutor severo ma utile, esperto della materia "${materia.nome_materia}". `;
-        systemInstruction += `Devi rispondere SOLO a domande riguardanti questa materia. Se l'utente fa domande su altri argomenti, rifiutati di rispondere e riportalo allo studio con tono severo ma costruttivo.\n\n`;
+        let systemInstruction = `${prompts.systemInstruction}\n\nAttualmente stai aiutando lo studente nella materia: "${materia.nome_materia}".\n\n`;
 
         if (materia.scheda_trasparenza) {
             systemInstruction += `Il programma (Scheda Trasparenza) è il seguente:\n${materia.scheda_trasparenza}\n\n`;
