@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Studio - Aula Studio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="js/theme.js"></script>
+</head>
+<body>
+
+<div class="studio-layout">
+  <div class="studio-container">
+    <!-- Sidebar Materie -->
+    <aside class="studio-sidebar">
+        <div class="sidebar-header">
+            <h3>Le tue Materie</h3>
+            <button class="btn-secondary" id="backToDashBtn" style="padding: 0.5rem; width: auto; border-radius: 8px;">← Esci</button>
+        </div>
+        <div class="sidebar-materie" id="sidebarMaterieList">
+            <p style="padding: 1rem;" class="text-secondary">Caricamento...</p>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="studio-main" id="chatContainer" style="display: none;">
+        <header class="chat-header">
+            <div>
+                <h2 id="chatTitle" style="font-size: 1.25rem;">Nome Materia</h2>
+                <p class="text-secondary" style="font-size: 0.85rem;">Tutor AI Online</p>
+            </div>
+            <div class="chat-tools">
+                <button class="tool-btn" id="btnPomodoro" style="font-weight: bold; margin-right: 0.5rem;">⏱️ 25:00</button>
+                <div class="dropdown">
+                    <button class="tool-btn">🎨 Personalizza ▾</button>
+                    <div class="dropdown-content">
+                        <button class="tool-btn theme-toggle-btn" style="text-align: left;">🌙 Modalità Scura</button>
+                        <button class="tool-btn" id="btnCambiaStile" style="text-align: left;">🎨 Cambia Stile Chat</button>
+                        <hr style="border: none; border-top: 1px solid #E4E6EB; margin: 0;">
+                        <button class="tool-btn btn-emergency" id="btnResetChat" style="border-radius: 0;">🗑️ Reset Chat</button>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="tool-btn">⏱️ Sessione ▾</button>
+                    <div class="dropdown-content">
+                        <button class="tool-btn" id="btnAiuto">🆘 Aiuto</button>
+                        <button class="tool-btn" id="btnDistraggo">⚠️ Distratto</button>
+                    </div>
+                </div>
+
+                <input type="file" id="studioAddFileInput" style="display: none;" accept=".pdf,image/*">
+            </div>
+        </header>
+
+        <div class="chat-messages" id="chatArea">
+            <div class="message ai">
+                Seleziona una materia a sinistra per iniziare.
+            </div>
+        </div>
+
+        <form class="chat-input-area" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Scrivi un messaggio..." required autocomplete="off">
+            <button type="submit" id="sendBtn">➤</button>
+        </form>
+    </main>
+
+    <!-- Empty State -->
+    <main class="studio-main" id="emptyState" style="align-items: center; justify-content: center; background-image: none;">
+        <div class="glass-panel" style="padding: 3rem; text-align: center;">
+            <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Seleziona una Materia</h2>
+            <p class="text-secondary">Le materie si gestiscono dalla tua Dashboard.</p>
+        </div>
+    </main>
+  </div>
+</div>
+
+<button class="theme-toggle-btn icon-only fixed-theme-btn" title="Cambia Tema">🌙</button>
+
+<script src="js/studio.js"></script>
+</body>
+</html>
