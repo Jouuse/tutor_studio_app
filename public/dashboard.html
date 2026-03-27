@@ -3,70 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutor Studio - Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Tutor Studio - Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme.js"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
-<body style="align-items: flex-start;">
+<body>
 
-<div class="dashboard-container">
-    <header class="dashboard-header">
-        <div>
-            <h1 class="app-title" style="text-align: left; font-size: 2rem;">Tutor Studio</h1>
-            <p id="userGreeting" class="text-secondary">Benvenuto, -</p>
-        </div>
-        <button id="logoutBtn" class="logout-btn">Esci</button>
-    </header>
+<button id="logoutBtn" class="btn-danger logout-btn-top">Esci</button>
+<button class="theme-toggle-btn icon-only fixed-theme-btn" title="Cambia Tema">🌙</button>
 
-    <h2>Aggiungi una nuova Materia</h2>
-    <div class="card mt-2 mb-3">
-        <form id="materiaForm">
-            <div class="grid-2">
-                <div>
-                    <div class="form-group">
-                        <label for="nome_materia">Nome Materia</label>
-                        <input type="text" id="nome_materia" name="nome_materia" required placeholder="Es. Analisi Matematica 1">
-                    </div>
-                    
-                    <div class="form-group grid-2">
-                        <div>
-                            <label for="cfu">CFU</label>
-                            <input type="number" id="cfu" name="cfu" placeholder="Es. 9">
-                        </div>
-                        <div>
-                            <label for="anno">Anno</label>
-                            <input type="number" id="anno" name="anno" placeholder="Es. 1">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="file_appunti">File Appunti (PDF, Immagini)</label>
-                        <input type="file" id="file_appunti" name="file_appunti" accept=".pdf,image/*">
-                    </div>
-                </div>
-                
-                <div>
-                    <div class="form-group">
-                        <label for="scheda_trasparenza">Scheda Trasparenza (Programma copincollato)</label>
-                        <textarea id="scheda_trasparenza" name="scheda_trasparenza" rows="4" placeholder="Incolla qui il programma del corso..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="appunti">Appunti Testuali (Opzionale)</label>
-                        <textarea id="appunti" name="appunti" rows="4" placeholder="Incolla o scrivi qui i tuoi appunti extra..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" id="submitMateriaBtn" style="margin-top: 1rem;">Salva Materia 💾</button>
-        </form>
+<div class="dashboard-hub glass-panel" style="max-width: 1000px;">
+    <h1 class="app-title" id="userGreeting" style="font-size: 3.5rem;">Benvenuto!</h1>
+    <p class="text-secondary" style="font-size: 1.15rem; margin-bottom: 2rem;">Il tuo centro di comando. Inizia a studiare o gestisci il tuo spazio.</p>
+    
+    <div class="hub-actions mb-3">
+        <button id="startStudyBtn" class="btn-lg">Inizia a Studiare 🚀</button>
     </div>
 
-    <h2>Il Tuo Magazzino Materie</h2>
-    <div id="materieList" class="materie-list">
-        <!-- Le materie verranno caricate qui dinamicamente -->
-        <p class="text-secondary">Caricamento materie in corso...</p>
+    <!-- Gestione Materie -->
+    <div style="border-top: 1px solid #E4E6EB; padding-top: 2rem; margin-top: 2rem; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Le tue Materie</h2>
+            <button id="openAddMateriaBtn" style="width: auto; padding: 0.6rem 1.2rem; border-radius: 20px;">+ Nuova Materia</button>
+        </div>
+        
+        <div id="materieGrid" class="materie-grid">
+            <p class="text-secondary">Caricamento...</p>
+        </div>
     </div>
 </div>
 
-<script src="/js/dashboard.js"></script>
+<input type="file" id="dashboardAddFileInput" style="display: none;" accept=".pdf,image/*">
+
+<!-- Modal Aggiungi Materia -->
+<div class="modal-overlay hidden" id="materiaModal">
+    <div class="modal-content">
+        <h2 class="mb-2">Nuova Materia</h2>
+        <form id="materiaForm">
+            <div class="form-group">
+                <input type="text" id="nome_materia" name="nome_materia" required placeholder="Nome Materia">
+            </div>
+            <div class="form-group grid-2">
+                <input type="number" id="cfu" name="cfu" placeholder="CFU">
+                <input type="number" id="anno" name="anno" placeholder="Anno">
+            </div>
+            <div class="form-group">
+                <textarea id="scheda_trasparenza" name="scheda_trasparenza" rows="2" placeholder="Programma o Scheda Trasparenza..."></textarea>
+            </div>
+            <div class="form-group">
+                <textarea id="appunti" name="appunti" rows="2" placeholder="Appunti aggiuntivi..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>File Appunti</label>
+                <input type="file" id="file_appunti" name="file_appunti" accept=".pdf,image/*">
+            </div>
+            <div class="grid-2 mt-2">
+                <button type="button" class="btn-secondary" id="closeModalBtn">Annulla</button>
+                <button type="submit" id="submitMateriaBtn" id="materiaSubmit">Salva</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="js/dashboard.js"></script>
 </body>
 </html>
