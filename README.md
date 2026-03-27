@@ -1,6 +1,6 @@
-# 📚 Tutor Studio App
+# 📚 Tutor Studio App di VITO CIRO vito.ciro@community.unipa.it / vitociro13@gmail.com
 
-Ciao! Questo è il repository del **Tutor Studio**. L'idea è creare un ambiente di studio assistito dall'IA che non sia solo una chat, ma un vero hub organizzato.
+ Questo è il repository del **Tutor Studio**. L'idea è creare un ambiente di studio assistito dall'IA che non sia solo una chat, ma un vero hub organizzato. 
 
 ## 🛠️ Com'è strutturato (Architettura)
 Ho diviso il progetto in due macro-aree per non impazzire con i file:
