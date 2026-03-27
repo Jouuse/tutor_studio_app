@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Studio - Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1 class="app-title">Tutor Studio</h1>
+    <p class="text-center text-secondary mb-3">Accedi o Registrati per iniziare a studiare.</p>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" required placeholder="Es. Mario">
+        </div>
+        
+        <div class="form-group">
+            <label for="cognome">Cognome</label>
+            <input type="text" id="cognome" name="cognome" required placeholder="Es. Rossi">
+        </div>
+        
+        <div class="form-group">
+            <label for="corso_laurea">Corso di Laurea</label>
+            <input type="text" id="corso_laurea" name="corso_laurea" required placeholder="Es. Informatica">
+        </div>
+        
+        <div class="form-group">
+            <label for="tipo_laurea">Tipo di Laurea</label>
+            <select id="tipo_laurea" name="tipo_laurea" required>
+                <option value="" disabled selected>Seleziona un'opzione</option>
+                <option value="Triennale">Triennale</option>
+                <option value="Magistrale">Magistrale</option>
+                <option value="Ciclo Unico">Ciclo Unico</option>
+            </select>
+        </div>
+        
+        <button type="submit" id="submitBtn">Entra 🚀</button>
+    </form>
+</div>
+
+<script src="/js/index.js"></script>
+</body>
+</html>

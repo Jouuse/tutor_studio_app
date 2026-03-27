@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Studio - Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="align-items: flex-start;">
+
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <div>
+            <h1 class="app-title" style="text-align: left; font-size: 2rem;">Tutor Studio</h1>
+            <p id="userGreeting" class="text-secondary">Benvenuto, -</p>
+        </div>
+        <button id="logoutBtn" class="logout-btn">Esci</button>
+    </header>
+
+    <h2>Aggiungi una nuova Materia</h2>
+    <div class="card mt-2 mb-3">
+        <form id="materiaForm">
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label for="nome_materia">Nome Materia</label>
+                        <input type="text" id="nome_materia" name="nome_materia" required placeholder="Es. Analisi Matematica 1">
+                    </div>
+                    
+                    <div class="form-group grid-2">
+                        <div>
+                            <label for="cfu">CFU</label>
+                            <input type="number" id="cfu" name="cfu" placeholder="Es. 9">
+                        </div>
+                        <div>
+                            <label for="anno">Anno</label>
+                            <input type="number" id="anno" name="anno" placeholder="Es. 1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file_appunti">File Appunti (PDF, Immagini)</label>
+                        <input type="file" id="file_appunti" name="file_appunti" accept=".pdf,image/*">
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="form-group">
+                        <label for="scheda_trasparenza">Scheda Trasparenza (Programma copincollato)</label>
+                        <textarea id="scheda_trasparenza" name="scheda_trasparenza" rows="4" placeholder="Incolla qui il programma del corso..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appunti">Appunti Testuali (Opzionale)</label>
+                        <textarea id="appunti" name="appunti" rows="4" placeholder="Incolla o scrivi qui i tuoi appunti extra..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" id="submitMateriaBtn" style="margin-top: 1rem;">Salva Materia 💾</button>
+        </form>
+    </div>
+
+    <h2>Il Tuo Magazzino Materie</h2>
+    <div id="materieList" class="materie-list">
+        <!-- Le materie verranno caricate qui dinamicamente -->
+        <p class="text-secondary">Caricamento materie in corso...</p>
+    </div>
+</div>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
