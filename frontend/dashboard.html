@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Studio - Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme.js"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<button id="logoutBtn" class="btn-danger logout-btn-top">Esci</button>
+<button class="theme-toggle-btn icon-only fixed-theme-btn" title="Cambia Tema">🌙</button>
+
+<div class="dashboard-hub glass-panel" style="max-width: 1000px;">
+    <h1 class="app-title" id="userGreeting" style="font-size: 3.5rem;">Benvenuto!</h1>
+    <p class="text-secondary" style="font-size: 1.15rem; margin-bottom: 2rem;">Il tuo centro di comando. Inizia a studiare o gestisci il tuo spazio.</p>
+    
+    <div class="hub-actions mb-3" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button id="startStudyBtn" class="btn-lg" style="margin: 0;">Inizia a Studiare 🚀</button>
+        <a href="https://www.chess.com/play" target="_blank" style="text-decoration: none;">
+            <button class="btn-lg btn-secondary" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">♟️ Pausa Scacchi</button>
+        </a>
+    </div>
+
+    <!-- Gestione Materie -->
+    <div style="border-top: 1px solid #E4E6EB; padding-top: 2rem; margin-top: 2rem; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Le tue Materie</h2>
+            <button id="openAddMateriaBtn" style="width: auto; padding: 0.6rem 1.2rem; border-radius: 20px;">+ Nuova Materia</button>
+        </div>
+        
+        <div id="materieGrid" class="materie-grid">
+            <p class="text-secondary">Caricamento...</p>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="dashboardAddFileInput" style="display: none;" accept=".pdf,image/*">
+
+<!-- Modal Aggiungi Materia -->
+<div class="modal-overlay hidden" id="materiaModal">
+    <div class="modal-content">
+        <h2 class="mb-2">Nuova Materia</h2>
+        <form id="materiaForm">
+            <div class="form-group">
+                <input type="text" id="nome_materia" name="nome_materia" required placeholder="Nome Materia">
+            </div>
+            <div class="form-group grid-2">
+                <input type="number" id="cfu" name="cfu" placeholder="CFU">
+                <input type="number" id="anno" name="anno" placeholder="Anno">
+            </div>
+            <div class="form-group">
+                <textarea id="scheda_trasparenza" name="scheda_trasparenza" rows="2" placeholder="Programma o Scheda Trasparenza..."></textarea>
+            </div>
+            <div class="form-group">
+                <textarea id="appunti" name="appunti" rows="2" placeholder="Appunti aggiuntivi..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>File Appunti</label>
+                <input type="file" id="file_appunti" name="file_appunti" accept=".pdf,image/*">
+            </div>
+            <div class="grid-2 mt-2">
+                <button type="button" class="btn-secondary" id="closeModalBtn">Annulla</button>
+                <button type="submit" id="submitMateriaBtn" id="materiaSubmit">Salva</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>
