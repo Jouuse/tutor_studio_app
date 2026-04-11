@@ -1,25 +1,122 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Controllo login
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-        window.location.href = '/index.html';
-        return;
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) { 
+        console.log('Nessun utente trovato'); 
+        document.getElementById('userGreeting').textContent = 'Benvenuto!';
+    } else {
+        document.getElementById('userGreeting').textContent = `Bentornato, ${user.nome}!`;
     }
 
-    const user = JSON.parse(userStr);
-    document.getElementById('userGreeting').textContent = `Benvenuto/a, ${user.nome} ${user.cognome} (${user.corso_laurea})`;
+    // Inizia a studiare
+    document.getElementById('startStudyBtn').addEventListener('click', () => {
+        window.location.href = 'studio.html';
+    });
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('user');
-        window.location.href = '/index.html';
+        localStorage.clear();
+        window.location.href = 'index.html';
     });
 
-    // Carica materie
-    fetchMaterie(user.id);
+    if (!user) return;
 
-    // Gestione form
+    // Elementi
+    const materieGrid = document.getElementById('materieGrid');
+    const openAddMateriaBtn = document.getElementById('openAddMateriaBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const materiaModal = document.getElementById('materiaModal');
     const materiaForm = document.getElementById('materiaForm');
+
+    // Modale
+    openAddMateriaBtn.addEventListener('click', () => materiaModal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => materiaModal.classList.add('hidden'));
+
+    // Caricamento Extra File Logic
+    const dashboardAddFileInput = document.getElementById('dashboardAddFileInput');
+    let currentDashboardMateriaId = null;
+
+    dashboardAddFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file || !currentDashboardMateriaId) return;
+
+        const formData = new FormData();
+        formData.append('file_appunti', file);
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/materie/${currentDashboardMateriaId}/materiali`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('File caricato con successo!');
+            } else {
+                alert('Errore durante il caricamento del file.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Errore di connessione.');
+        } finally {
+            dashboardAddFileInput.value = ''; // reset input
+        }
+    });
+
+    // Caricamento Dati
+    async function fetchMaterie() {
+        try {
+            const response = await fetch(`http://localhost:3000/api/materie?utente_id=${user.id}`);
+            const materie = await response.json();
+            
+            materieGrid.innerHTML = '';
+            
+            if (materie.length === 0) {
+                materieGrid.innerHTML = '<p class="text-secondary">Nessuna materia aggiunta. Creane una nuova!</p>';
+                return;
+            }
+
+            materie.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'materia-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="materia-card-header">
+                            <span style="font-size: 1.5rem;">📚</span>
+                            <div class="materia-card-title">${m.nome_materia}</div>
+                        </div>
+                        <p class="text-secondary" style="font-size: 0.85rem;">CFU: ${m.cfu} - Anno: ${m.anno}</p>
+                    </div>
+                    <div class="materia-card-actions">
+                        <button class="btn-icon btn-secondary btn-rename" data-id="${m.id}" data-nome="${m.nome_materia}">✏️</button>
+                        <button class="btn-icon btn-secondary btn-add-file" data-id="${m.id}">📎 File</button>
+                        <button class="btn-icon btn-danger btn-delete" data-id="${m.id}">🗑️</button>
+                    </div>
+                `;
+                materieGrid.appendChild(card);
+            });
+
+            // Bind events
+            document.querySelectorAll('.btn-add-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentDashboardMateriaId = e.target.dataset.id;
+                    dashboardAddFileInput.click();
+                });
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => deleteMateria(e.target.dataset.id));
+            });
+
+            document.querySelectorAll('.btn-rename').forEach(btn => {
+                btn.addEventListener('click', (e) => renameMateria(e.target.dataset.id, e.target.dataset.nome));
+            });
+
+        } catch (error) {
+            console.error(error);
+            materieGrid.innerHTML = '<p class="text-danger">Errore di caricamento.</p>';
+        }
+    }
+
+    // Aggiungi
     materiaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -38,83 +135,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const submitBtn = document.getElementById('submitMateriaBtn');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Salvataggio in corso...';
+        submitBtn.textContent = 'Salvataggio...';
 
         try {
-            const response = await fetch('/api/materie', {
+            const response = await fetch('http://localhost:3000/api/materie', {
                 method: 'POST',
                 body: formData
             });
 
-            if (!response.ok) {
-                throw new Error('Errore durante il salvataggio');
-            }
+            if (!response.ok) throw new Error('Errore di connessione');
 
-            // Resetta form e ricarica list
             materiaForm.reset();
-            alert('Materia salvata con successo!');
-            fetchMaterie(user.id);
+            materiaModal.classList.add('hidden');
+            fetchMaterie();
 
         } catch (error) {
             console.error(error);
             alert('Errore di connessione o salvataggio fallito.');
         } finally {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Salva Materia 💾';
+            submitBtn.textContent = 'Salva';
         }
     });
-});
 
-async function fetchMaterie(userId) {
-    const listContainer = document.getElementById('materieList');
-    
-    try {
-        const response = await fetch(`/api/materie?utente_id=${userId}`);
-        if (!response.ok) throw new Error('Network error');
-        
-        const materie = await response.json();
-        
-        listContainer.innerHTML = '';
-        
-        if (materie.length === 0) {
-            listContainer.innerHTML = '<p class="text-secondary">Non hai ancora aggiunto nessuna materia. Aggiungine una dal form qui sopra!</p>';
-            return;
+    // Elimina
+    async function deleteMateria(id) {
+        if (!confirm('Sei sicuro di voler eliminare questa materia e tutti i suoi appunti?')) return;
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/materie/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                // Rimuovi dal layout local storage se è quella attiva
+                if(localStorage.getItem('currentMateriaId') == id) localStorage.removeItem('currentMateriaId');
+                fetchMaterie();
+            } else {
+                alert('Errore eliminazione.');
+            }
+        } catch (e) {
+            console.error(e);
         }
-
-        materie.forEach(materia => {
-            const card = document.createElement('div');
-            card.className = 'materia-card';
-            
-            card.innerHTML = `
-                <div>
-                    <h3 class="materia-title">${materia.nome_materia}</h3>
-                    <div class="materia-info">
-                        Anno: ${materia.anno} | CFU: ${materia.cfu}
-                    </div>
-                </div>
-                <div>
-                    <button class="btn-secondary" onclick="modificaMateria(${materia.id})">Modifica Materiale</button>
-                    <button onclick="iniziaStudiare(${materia.id})">Inizia a Studiare 🚀</button>
-                </div>
-            `;
-            
-            listContainer.appendChild(card);
-        });
-        
-    } catch (error) {
-        console.error(error);
-        listContainer.innerHTML = '<p class="text-danger">Errore nel caricamento delle materie.</p>';
     }
-}
 
-// Funzioni per bottoni
-window.modificaMateria = (materiaId) => {
-    // Al momento un semplice alert, espandibile in futuro
-    alert("Funzionalità 'Modifica Materiale' in arrivo! Per ora aggiungili come nuova materia o usa il DB direttamente.");
-};
+    // Rinomina
+    async function renameMateria(id, oldName) {
+        const newName = prompt('Nuovo nome della materia:', oldName);
+        if (!newName || newName.trim() === '' || newName === oldName) return;
 
-window.iniziaStudiare = (materiaId) => {
-    // Salva l'id della materia corrente
-    localStorage.setItem('currentMateriaId', materiaId);
-    window.location.href = '/studio.html';
-};
+        try {
+            const res = await fetch(`http://localhost:3000/api/materie/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome_materia: newName })
+            });
+
+            if (res.ok) fetchMaterie();
+            else alert('Errore rinomina.');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    fetchMaterie();
+});

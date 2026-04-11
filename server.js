@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
+const prompts = require('./prompts');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,19 @@ let pool;
 try {
     pool = mysql.createPool(dbConfig);
     console.log("Connessione al database configurata.");
+    
+    // Auto-migrate new table for multi-file suppport
+    pool.execute(`
+        CREATE TABLE IF NOT EXISTS materiali_extra (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            materia_id INT NOT NULL,
+            nome_file VARCHAR(255) NOT NULL,
+            creato_il TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (materia_id) REFERENCES materie(id) ON DELETE CASCADE
+        )
+    `).then(() => console.log("Tabella materiali_extra verificata"))
+    .catch(err => console.error("Errore creazione tabella materiali_extra:", err));
+
 } catch (err) {
     console.error("Errore di configurazione DB:", err);
 }
@@ -147,8 +161,7 @@ app.post('/api/chat', async (req, res) => {
         const materia = rows[0];
 
         // Costruisci le System Instructions
-        let systemInstruction = `Sei un tutor severo ma utile, esperto della materia "${materia.nome_materia}". `;
-        systemInstruction += `Devi rispondere SOLO a domande riguardanti questa materia. Se l'utente fa domande su altri argomenti, rifiutati di rispondere e riportalo allo studio con tono severo ma costruttivo.\n\n`;
+        let systemInstruction = `${prompts.systemInstruction}\n\nAttualmente stai aiutando lo studente nella materia: "${materia.nome_materia}".\n\n`;
 
         if (materia.scheda_trasparenza) {
             systemInstruction += `Il programma (Scheda Trasparenza) è il seguente:\n${materia.scheda_trasparenza}\n\n`;
@@ -157,11 +170,16 @@ app.post('/api/chat', async (req, res) => {
             systemInstruction += `Gli appunti dello studente sono:\n${materia.appunti}\n\n`;
         }
 
-        // Al momento, il file PDF viene solo segnalato per contesto.
-        // L'analisi diretta del PDF con Google Generative AI File API richiederebbe l'upload sui server di Google
-        // cosa che possiamo implementare ma per il momento forniamo il nome del file nelle istruzioni.
         if (materia.file_appunti) {
-            systemInstruction += `Lo studente ha un file allegato: "${materia.file_appunti}". Usalo come riferimento.\n\n`;
+            systemInstruction += `Lo studente ha un file principale allegato: "${materia.file_appunti}". Usalo come riferimento.\n\n`;
+        }
+
+        // Aggiungi file extra dal database
+        const [extraFiles] = await pool.execute('SELECT nome_file FROM materiali_extra WHERE materia_id = ?', [materia_id]);
+        if (extraFiles.length > 0) {
+            systemInstruction += `Lo studente ha anche aggiunto questi altri materiali alla materia (riferimento a file caricati): `;
+            const fileNames = extraFiles.map(f => `"${f.nome_file}"`).join(', ');
+            systemInstruction += `${fileNames}.\n\n`;
         }
 
         const model = genAI.getGenerativeModel({
@@ -184,6 +202,69 @@ app.post('/api/chat', async (req, res) => {
     } catch (err) {
         console.error("Errore in /api/chat:", err);
         res.status(500).json({ error: 'Errore durante la comunicazione con Gemini' });
+    }
+});
+
+// 5. Materiali Aggiuntivi: Recupera
+app.get('/api/materie/:id/materiali', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.execute('SELECT * FROM materiali_extra WHERE materia_id = ?', [id]);
+        res.json(rows);
+    } catch (err) {
+        console.error("Errore in GET /api/materie/:id/materiali:", err);
+        res.status(500).json({ error: 'Errore del server' });
+    }
+});
+
+// 6. Materiali Aggiuntivi: Carica
+app.post('/api/materie/:id/materiali', upload.single('file_appunti'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const file_appunti = req.file ? req.file.filename : null;
+
+        if (!file_appunti) {
+            return res.status(400).json({ error: 'Nessun file caricato' });
+        }
+
+        const [result] = await pool.execute(
+            'INSERT INTO materiali_extra (materia_id, nome_file) VALUES (?, ?)',
+            [id, file_appunti]
+        );
+
+        res.status(201).json({ message: 'File aggiunto', id: result.insertId, nome_file: file_appunti });
+    } catch (err) {
+        console.error("Errore in POST /api/materie/:id/materiali:", err);
+        res.status(500).json({ error: 'Errore del server' });
+    }
+});
+
+// 7. Elimina materia
+app.delete('/api/materie/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.execute('DELETE FROM materie WHERE id = ?', [id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Materia non trovata' });
+        res.json({ message: 'Materia eliminata' });
+    } catch (err) {
+        console.error("Errore in DELETE /api/materie:", err);
+        res.status(500).json({ error: 'Errore del server' });
+    }
+});
+
+// 6. Rinomina materia
+app.put('/api/materie/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nome_materia } = req.body;
+        if (!nome_materia) return res.status(400).json({ error: 'Nome richiesto' });
+        
+        const [result] = await pool.execute('UPDATE materie SET nome_materia = ? WHERE id = ?', [nome_materia, id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Materia non trovata' });
+        res.json({ message: 'Materia rinominata' });
+    } catch (err) {
+        console.error("Errore in PUT /api/materie:", err);
+        res.status(500).json({ error: 'Errore del server' });
     }
 });
 
